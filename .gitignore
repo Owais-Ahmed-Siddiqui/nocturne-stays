@@ -1,0 +1,14 @@
+# env files (VERY IMPORTANT)
+backend/.env.local
+.env
+.env.*
+
+# node modules
+backend/node_modules/
+
+# logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

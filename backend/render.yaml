@@ -1,0 +1,13 @@
+# backend/render.yaml
+services:
+  - type: web
+    name: nocturne-stays-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false # We'll set this manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true # Render will generate a random secret

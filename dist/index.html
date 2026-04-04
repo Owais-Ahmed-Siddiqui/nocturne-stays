@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nocturne Stays — Hotel Booking System</title>
+
+  <!-- Tailwind CDN (required) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#040406;
+      --bg1:#07080B;
+      --card:#0B0C10;
+      --card2:#07080B;
+      --line:rgba(255,255,255,.08);
+      --text:rgba(255,255,255,.90);
+      --muted:rgba(255,255,255,.62);
+      --muted2:rgba(255,255,255,.42);
+      --brand:rgba(255,255,255,.92);
+      --brand2:rgba(255,255,255,.62);
+      --good:#34D399;
+      --warn:#FBBF24;
+      --bad:#FB7185;
+    }
+
+    html, body { height: 100%; }
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 680px at 18% 12%, rgba(255,255,255,.08), transparent 60%),
+        radial-gradient(900px 520px at 85% 18%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(780px 560px at 70% 92%, rgba(255,255,255,.05), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x: hidden;
+      line-height: 1.55;
+    }
+
+    .font-display{ font-family: "Playfair Display", ui-serif, Georgia, serif; }
+
+    /* Subtle animated grain */
+    .grain:before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="220" height="220" filter="url(%23n)" opacity="0.22"/></svg>');
+      mix-blend-mode: overlay;
+      opacity: .10;
+      animation: grainMove 10s steps(10) infinite;
+    }
+    @keyframes grainMove{
+      0%{ transform: translate3d(0,0,0); }
+      10%{ transform: translate3d(-2%, -1%, 0); }
+      20%{ transform: translate3d(-4%, 1%, 0); }
+      30%{ transform: translate3d(2%, 2%, 0); }
+      40%{ transform: translate3d(4%, -1%, 0); }
+      50%{ transform: translate3d(-2%, 2%, 0); }
+      60%{ transform: translate3d(-4%, 0%, 0); }
+      70%{ transform: translate3d(2%, -2%, 0); }
+      80%{ transform: translate3d(4%, 1%, 0); }
+      90%{ transform: translate3d(-1%, -2%, 0); }
+      100%{ transform: translate3d(0,0,0); }
+    }
+
+    /* Glass / cards */
+    .glass{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+      border: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(11,12,16,.92), rgba(7,8,11,.88));
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+    }
+
+    .ring-glow{
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.10) inset,
+        0 0 0 1px rgba(255,255,255,.06),
+        0 22px 70px rgba(0,0,0,.65);
+    }
+
+    .btn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      box-shadow: 0 14px 55px rgba(0,0,0,.55);
+      transition: transform .15s ease, box-shadow .25s ease, filter .25s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 18px 80px rgba(0,0,0,.68); }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+
+    .btn-ghost{
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.10);
+      transition: background .2s ease, transform .15s ease;
+    }
+    .btn-ghost:hover{ background: rgba(255,255,255,.06); transform: translateY(-1px); }
+
+    .input{
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.10);
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .input:focus{
+      border-color: rgba(255,255,255,.35);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.10);
+    }
+
+    /* Scroll reveal */
+    .reveal{ opacity: 0; transform: translateY(10px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+    .reveal.in{ opacity: 1; transform: translateY(0); }
+
+    /* Shimmer */
+    .shimmer{
+      background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.11), rgba(255,255,255,.04));
+      background-size: 300% 100%;
+      animation: shimmer 3.2s ease-in-out infinite;
+    }
+    @keyframes shimmer{ 0%{ background-position: 0% 0; } 100%{ background-position: 120% 0; } }
+
+    /* Fancy divider */
+    .divider{
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), rgba(255,255,255,.12), transparent);
+    }
+
+    /* Hide number input spinners in some browsers */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    /* Neutralize old accent utility colors (keeps markup unchanged) */
+    .text-cyan-300\/80,
+    .text-violet-300\/80,
+    .text-emerald-300\/80{ color: rgba(255,255,255,.72) !important; }
+
+    .ring-cyan-300\/35{ --tw-ring-color: rgba(255,255,255,.18) !important; }
+    .ring-cyan-300\/20,
+    .ring-violet-300\/30{ --tw-ring-color: rgba(255,255,255,.16) !important; }
+
+    .border-cyan-300\/30{ border-color: rgba(255,255,255,.14) !important; }
+
+    input.accent-cyan-300{ accent-color: rgba(255,255,255,.85) !important; }
+
+    /* Make layout feel more open without changing markup */
+    .max-w-7xl{ max-width: 86rem !important; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .reveal{ transition: none !important; }
+      .grain:before{ animation: none !important; }
+      .shimmer{ animation: none !important; }
+    }
+  </style>
+</head>
+<body class="grain">
+  <!-- Top glow accents -->
+  <div aria-hidden="true" class="fixed -z-10 inset-0">
+    <div class="absolute -top-44 -left-56 w-[620px] h-[620px] rounded-full blur-3xl opacity-25" style="background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 62%);"></div>
+    <div class="absolute -top-40 -right-64 w-[680px] h-[680px] rounded-full blur-3xl opacity-20" style="background: radial-gradient(circle at 40% 40%, rgba(255,255,255,.12), transparent 62%);"></div>
+  </div>
+
+  <!-- Header / Nav -->
+  <header class="sticky top-0 z-50">
+    <div class="glass border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="h-16 flex items-center justify-between">
+          <a href="#home" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl grid place-items-center ring-glow" style="background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.10);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-90">
+                <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5Z" stroke="white" stroke-opacity="0.9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="leading-tight">
+              <div class="font-display text-lg tracking-wide">Nocturne Stays</div>
+              <div class="text-xs text-white/55">Luxury hotel bookings</div>
+            </div>
+          </a>
+
+          <nav class="hidden md:flex items-center gap-1">
+            <a class="navlink px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#home">Home</a>
+            <a class="navlink px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#hotels">Hotels</a>
+            <a class="navlink px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#mybookings" data-auth="user">My Bookings</a>
+            <a class="navlink px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#admin" data-auth="admin">Admin</a>
+            <a class="navlink px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#help">Help</a>
+          </nav>
+
+          <div class="flex items-center gap-2">
+            <div id="sessionBadge" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+              <span class="w-2 h-2 rounded-full" id="sessionDot" style="background: rgba(255,255,255,.35);"></span>
+              <div class="text-xs">
+                <div class="text-white/80" id="sessionName">Guest</div>
+                <div class="text-white/45" id="sessionRole">Not signed in</div>
+              </div>
+            </div>
+
+
+            <button id="btnAuth" class="btn-ghost px-3 py-2 rounded-xl text-sm">Login</button>
+            <button id="btnLogout" class="hidden btn-ghost px-3 py-2 rounded-xl text-sm">Logout</button>
+
+            <button id="mobileMenuBtn" class="md:hidden btn-ghost px-3 py-2 rounded-xl" aria-label="Open menu">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-80">
+                <path d="M4 7h16M4 12h16M4 17h16" stroke="white" stroke-opacity="0.9" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mobileMenu" class="md:hidden hidden border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 grid gap-1">
+          <a class="px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#home">Intro</a>
+          <a class="px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#hotels">Hotels</a>
+          <a class="px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#mybookings" data-auth="user">My Bookings</a>
+          <a class="px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#admin" data-auth="admin">Admin</a>
+          <a class="px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5" href="#help">Help</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toasts -->
+  <div id="toasts" class="fixed z-[60] top-20 right-4 sm:right-6 grid gap-2 w-[min(92vw,380px)]"></div>
+
+  <!-- Main -->
+  <main class="max-w-[86rem] mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-14 lg:py-16">
+
+    <!-- HOME / INTRO -->
+    <section id="view-home" class="view">
+      <!-- Hero -->
+      <div class="grid lg:grid-cols-12 gap-7 lg:gap-10 items-stretch">
+        <div class="lg:col-span-7 card rounded-3xl overflow-hidden relative">
+          <div class="absolute inset-0 opacity-60" style="background:
+            radial-gradient(900px 480px at 20% 15%, rgba(255,255,255,.14), transparent 58%),
+            radial-gradient(700px 420px at 95% 25%, rgba(255,255,255,.08), transparent 58%),
+            linear-gradient(180deg, rgba(255,255,255,.06), transparent 52%);
+          "></div>
+          <div class="relative p-6 sm:p-10">
+            <div class="flex items-center gap-2 text-xs text-white/60">
+              <span class="px-2 py-1 rounded-full bg-white/5 border border-white/10">Curated stays</span>
+              <span class="px-2 py-1 rounded-full bg-white/5 border border-white/10">Pay at hotel</span>
+              <span class="px-2 py-1 rounded-full bg-white/5 border border-white/10">Instant receipt</span>
+            </div>
+            <h1 class="mt-5 font-display text-3xl sm:text-5xl leading-[1.05] tracking-tight">
+              Book a luxury escape.
+              <span class="block text-white/70">Five hotels, three room tiers, one smooth experience.</span>
+            </h1>
+            <p class="mt-4 text-white/65 max-w-xl">
+              Explore immersive properties—from minimalist city suites to ultra-premium skyline penthouses.
+              Create an account, choose your stay, and receive a professional receipt instantly. Admin approval workflow included.
+            </p>
+            <div class="mt-7 flex flex-wrap gap-3">
+              <a href="#hotels" class="btn text-sm px-5 py-3 rounded-xl">Explore hotels</a>
+              <a href="#login" class="btn-ghost text-sm px-5 py-3 rounded-xl">Login / Register</a>
+              <button id="heroQuickDemo" class="btn-ghost text-sm px-5 py-3 rounded-xl">View sample receipt</button>
+            </div>
+
+            <div class="mt-8 grid sm:grid-cols-3 gap-3">
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Avg. rating</div>
+                <div class="mt-1 text-2xl font-semibold">4.8<span class="text-sm text-white/50">/5</span></div>
+                <div class="mt-2 text-xs text-white/50">From 12,400+ verified stays</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Support</div>
+                <div class="mt-1 text-2xl font-semibold">24/7</div>
+                <div class="mt-2 text-xs text-white/50">Chat, phone & concierge</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Check-in</div>
+                <div class="mt-1 text-2xl font-semibold">2 PM</div>
+                <div class="mt-2 text-xs text-white/50">Late checkout on request</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Visual -->
+        <div class="lg:col-span-5 grid gap-6">
+          <div class="card rounded-3xl overflow-hidden relative">
+            <div class="absolute inset-0">
+              <img
+                alt="Luxury hotel lounge"
+                class="w-full h-full object-cover opacity-70"
+                loading="lazy"
+                src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1600&q=60"
+              />
+              <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.25), rgba(7,10,15,.85));"></div>
+            </div>
+            <div class="relative p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-xs text-white/60">Signature experience</div>
+                  <div class="font-display text-xl">Midnight Lounge</div>
+                </div>
+                <div class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/70">Live jazz • Fri–Sun</div>
+              </div>
+              <div class="mt-5 grid grid-cols-2 gap-3">
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                  <div class="text-xs text-white/55">Amenities</div>
+                  <div class="mt-2 text-sm text-white/75">Spa • Pool • Gym</div>
+                </div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                  <div class="text-xs text-white/55">Wi‑Fi</div>
+                  <div class="mt-2 text-sm text-white/75">High-speed • Free</div>
+                </div>
+              </div>
+              <div class="mt-5">
+                <div class="divider"></div>
+                <div class="mt-4 flex items-center justify-between">
+                  <div class="text-xs text-white/55">From</div>
+                  <div class="text-white/80 text-sm">PKR <span class="text-xl font-semibold" id="homeFromPrice">8,900</span><span class="text-xs text-white/55"> / night</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card rounded-3xl p-6 sm:p-7">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-white/55">What you get</div>
+                <div class="font-display text-xl">Services & Standards</div>
+              </div>
+              <div class="text-xs text-white/60">Nocturne Promise</div>
+            </div>
+
+            <div class="mt-5 grid grid-cols-2 gap-3">
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-sm font-semibold">Quiet Rooms</div>
+                <div class="text-xs text-white/55 mt-1">Acoustic glazing + blackout</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-sm font-semibold">Smart Check-in</div>
+                <div class="text-xs text-white/55 mt-1">Fast desk & digital ID</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-sm font-semibold">Premium Linen</div>
+                <div class="text-xs text-white/55 mt-1">300-thread-count bedding</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-sm font-semibold">Safety First</div>
+                <div class="text-xs text-white/55 mt-1">Verified partners & policies</div>
+              </div>
+            </div>
+
+            <div class="mt-5 text-xs text-white/50">
+              Tip: Book your stay, then manage requests from <span class="text-white/70">My Bookings</span>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlights / sections -->
+      <div class="mt-12 sm:mt-16 lg:mt-20 grid gap-12 sm:gap-14">
+        <section class="reveal">
+          <div class="flex items-end justify-between gap-4">
+            <div>
+              <h2 class="font-display text-2xl sm:text-3xl">Rooms, designed for the Noir Aesthetic</h2>
+              <p class="mt-2 text-white/60 max-w-2xl">Three tiers across all hotels: Standard (clean), Deluxe (bigger), Suite (statement). Transparent pricing and instant receipts.</p>
+            </div>
+            <a href="#hotels" class="hidden sm:inline-flex btn-ghost px-4 py-2 rounded-xl text-sm">Compare hotels →</a>
+          </div>
+
+          <div class="mt-6 grid md:grid-cols-3 gap-5">
+            <div class="card rounded-3xl overflow-hidden group">
+              <div class="relative aspect-[16/9]">
+                <img class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-85 transition" loading="lazy" alt="Standard room" src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=60" />
+                <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.15), rgba(7,10,15,.92));"></div>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center justify-between">
+                  <div class="font-display text-xl">Standard</div>
+                  <div class="text-xs text-white/55">Best value</div>
+                </div>
+                <ul class="mt-3 space-y-2 text-sm text-white/65">
+                  <li class="flex gap-2"><span class="text-cyan-300/80">•</span> Queen bed, rainfall shower</li>
+                  <li class="flex gap-2"><span class="text-cyan-300/80">•</span> Desk, blackout curtains</li>
+                  <li class="flex gap-2"><span class="text-cyan-300/80">•</span> High-speed Wi‑Fi</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card rounded-3xl overflow-hidden group">
+              <div class="relative aspect-[16/9]">
+                <img class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-85 transition" loading="lazy" alt="Deluxe room" src="https://images.unsplash.com/photo-1549875648-357fef68fec7?auto=format&fit=crop&w=1400&q=60" />
+                <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.15), rgba(7,10,15,.92));"></div>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center justify-between">
+                  <div class="font-display text-xl">Deluxe</div>
+                  <div class="text-xs text-white/55">Room to breathe</div>
+                </div>
+                <ul class="mt-3 space-y-2 text-sm text-white/65">
+                  <li class="flex gap-2"><span class="text-violet-300/80">•</span> Bigger layout + seating</li>
+                  <li class="flex gap-2"><span class="text-violet-300/80">•</span> City-view or pool-view</li>
+                  <li class="flex gap-2"><span class="text-violet-300/80">•</span> Priority check-in</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card rounded-3xl overflow-hidden group">
+              <div class="relative aspect-[16/9]">
+                <img class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-85 transition" loading="lazy" alt="Suite room" src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=60" />
+                <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.15), rgba(7,10,15,.92));"></div>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center justify-between">
+                  <div class="font-display text-xl">Suite</div>
+                  <div class="text-xs text-white/55">Iconic</div>
+                </div>
+                <ul class="mt-3 space-y-2 text-sm text-white/65">
+                  <li class="flex gap-2"><span class="text-emerald-300/80">•</span> Separate lounge + minibar</li>
+                  <li class="flex gap-2"><span class="text-emerald-300/80">•</span> Concierge + late checkout</li>
+                  <li class="flex gap-2"><span class="text-emerald-300/80">•</span> Best-view guarantee</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="reveal">
+          <div class="grid lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-4 card rounded-3xl p-6 sm:p-7">
+              <div class="text-xs text-white/55">Included in every stay</div>
+              <h3 class="mt-2 font-display text-2xl">Amenities</h3>
+              <p class="mt-2 text-sm text-white/60">A consistent standard, upgraded per hotel tier.</p>
+              <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Spa & Sauna</div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Infinity Pool</div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Gym</div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Restaurant</div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Airport pickup</div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Concierge</div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-8 card rounded-3xl overflow-hidden relative">
+              <div class="absolute inset-0">
+                <img class="w-full h-full object-cover opacity-70" loading="lazy" alt="Hotel pool" src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1700&q=60" />
+                <div class="absolute inset-0" style="background: linear-gradient(90deg, rgba(7,10,15,.92), rgba(7,10,15,.35));"></div>
+              </div>
+              <div class="relative p-6 sm:p-10">
+                <div class="max-w-xl">
+                  <div class="text-xs text-white/55">Signature services</div>
+                  <h3 class="mt-2 font-display text-3xl">Concierge that actually helps</h3>
+                  <p class="mt-3 text-white/60">From late checkouts and room preferences to city plans and transfers — your requests are tracked inside your booking receipt and visible to admin for approval.</p>
+
+                  <div class="mt-6 grid sm:grid-cols-2 gap-3">
+                    <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                      <div class="text-sm font-semibold">Flexible requests</div>
+                      <div class="text-xs text-white/55 mt-1">Extra pillows, quiet floor, anniversary note</div>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                      <div class="text-sm font-semibold">Transparent policy</div>
+                      <div class="text-xs text-white/55 mt-1">Pay at hotel • Verify at check-in</div>
+                    </div>
+                  </div>
+
+                  <div class="mt-7 flex flex-wrap gap-3">
+                    <a class="btn px-5 py-3 rounded-xl text-sm" href="#hotels">Choose a hotel</a>
+                    <a class="btn-ghost px-5 py-3 rounded-xl text-sm" href="#help">FAQs & policies</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <section class="reveal">
+          <div class="flex items-end justify-between gap-4">
+            <div>
+              <h2 class="font-display text-2xl sm:text-3xl">Reviews</h2>
+              <p class="mt-2 text-white/60">Realistic, detailed feedback—what a professional hotel page should show.</p>
+            </div>
+          </div>
+          <div class="mt-6 grid md:grid-cols-3 gap-5">
+            <div class="card rounded-3xl p-6">
+              <div class="flex items-center justify-between">
+                <div class="text-sm font-semibold">"Immaculate"</div>
+                <div class="text-xs text-white/55">Suite • 3 nights</div>
+              </div>
+              <p class="mt-3 text-sm text-white/65">The lighting, textures, and silence were perfect. Check-in was smooth, and the receipt had every detail. Paid at the hotel with zero friction.</p>
+              <div class="mt-4 text-xs text-white/55">— Ayesha K.</div>
+            </div>
+            <div class="card rounded-3xl p-6">
+              <div class="flex items-center justify-between">
+                <div class="text-sm font-semibold">"Worth it"</div>
+                <div class="text-xs text-white/55">Deluxe • 2 nights</div>
+              </div>
+              <p class="mt-3 text-sm text-white/65">Loved the lounge and the spa. The staff honored our late checkout request after admin approval. Would book again.</p>
+              <div class="mt-4 text-xs text-white/55">— Hamza R.</div>
+            </div>
+            <div class="card rounded-3xl p-6">
+              <div class="flex items-center justify-between">
+                <div class="text-sm font-semibold">"Great value"</div>
+                <div class="text-xs text-white/55">Standard • 1 night</div>
+              </div>
+              <p class="mt-3 text-sm text-white/65">Clean room, fast Wi‑Fi, and the dark theme is gorgeous. Booking flow felt like a real system.</p>
+              <div class="mt-4 text-xs text-white/55">— Zain M.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="reveal">
+          <div class="card rounded-3xl p-6 sm:p-10">
+            <div class="grid lg:grid-cols-12 gap-8">
+              <div class="lg:col-span-5">
+                <div class="text-xs text-white/55">Location</div>
+                <h2 class="mt-2 font-display text-2xl sm:text-3xl">In the heart of the city (and beyond)</h2>
+                <p class="mt-3 text-white/60">Each property lists a clear location, nearby highlights, and transport access. Select a hotel to see its details and room options.</p>
+                <div class="mt-5 grid gap-3">
+                  <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-sm font-semibold">Airport transfer</div>
+                    <div class="text-xs text-white/55 mt-1">Available at most locations (request in booking)</div>
+                  </div>
+                  <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-sm font-semibold">Nearby landmarks</div>
+                    <div class="text-xs text-white/55 mt-1">Museums, restaurants, skyline points</div>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:col-span-7">
+                <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/5">
+                  <div class="aspect-[16/10] relative">
+                    <img class="absolute inset-0 w-full h-full object-cover opacity-70" loading="lazy" alt="City aerial" src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1600&q=60" />
+                    <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.25), rgba(7,10,15,.88));"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+                      <div class="flex flex-wrap items-center gap-2 text-xs text-white/60">
+                        <span class="px-2 py-1 rounded-full bg-white/5 border border-white/10">Walkable districts</span>
+                        <span class="px-2 py-1 rounded-full bg-white/5 border border-white/10">Secure parking</span>
+                        <span class="px-2 py-1 rounded-full bg-white/5 border border-white/10">Quiet floors</span>
+                      </div>
+                      <div class="mt-3 text-sm text-white/70">Select a hotel to see its specific address and highlights.</div>
+                      <div class="mt-4">
+                        <a href="#hotels" class="btn-ghost inline-flex px-4 py-2 rounded-xl text-sm">Browse hotels →</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- HOTELS -->
+    <section id="view-hotels" class="view hidden">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 class="font-display text-3xl sm:text-4xl">Hotels</h1>
+          <p class="mt-2 text-white/60">Choose from 5 properties (sorted from less to more expensive). Select one to view details and book a room.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="sortPrice" class="btn-ghost px-4 py-2 rounded-xl text-sm">Sort: Price ↑</button>
+          <button id="filterCity" class="btn-ghost px-4 py-2 rounded-xl text-sm">Filter: All</button>
+        </div>
+      </div>
+
+      <div class="mt-8 grid lg:grid-cols-12 gap-7 lg:gap-10">
+        <div class="lg:col-span-8">
+          <div id="hotelGrid" class="grid sm:grid-cols-2 gap-6 lg:gap-7"></div>
+        </div>
+
+        <aside class="lg:col-span-4">
+          <div class="card rounded-3xl p-6 sm:p-7 sticky top-24">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-white/55">Selected</div>
+                <div class="font-display text-2xl" id="selectedHotelName">—</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-white/55">From</div>
+                <div class="text-white/85 text-sm">PKR <span class="text-2xl font-semibold" id="selectedHotelPrice">—</span></div>
+              </div>
+            </div>
+
+            <div class="mt-4 text-sm text-white/60" id="selectedHotelDesc">Pick a hotel from the left to see details here.</div>
+
+            <div class="mt-5 divider"></div>
+
+            <div class="mt-5">
+              <div class="text-xs text-white/55">Room tier</div>
+              <div class="mt-2 grid grid-cols-3 gap-2">
+                <button class="roomTierBtn btn-ghost px-3 py-2 rounded-xl text-xs" data-tier="standard">Standard</button>
+                <button class="roomTierBtn btn-ghost px-3 py-2 rounded-xl text-xs" data-tier="deluxe">Deluxe</button>
+                <button class="roomTierBtn btn-ghost px-3 py-2 rounded-xl text-xs" data-tier="suite">Suite</button>
+              </div>
+              <div class="mt-3 text-xs text-white/50" id="tierHint">Select a tier to see the estimate.</div>
+
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-xs text-white/55">Check-in</label>
+                  <input id="quickCheckin" type="date" class="input w-full mt-1 px-3 py-2 rounded-xl text-sm" />
+                </div>
+                <div>
+                  <label class="text-xs text-white/55">Check-out</label>
+                  <input id="quickCheckout" type="date" class="input w-full mt-1 px-3 py-2 rounded-xl text-sm" />
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center justify-between">
+                <div>
+                  <div class="text-xs text-white/55">Estimated total</div>
+                  <div class="text-lg font-semibold" id="quickEstimate">PKR —</div>
+                </div>
+                <button id="quickBookBtn" class="btn px-4 py-3 rounded-xl text-sm">Book</button>
+              </div>
+              <div class="mt-2 text-xs text-white/45">Final amount is paid at hotel. Admin approval may be required.</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Hotel detail drawer -->
+      <div id="hotelDetail" class="mt-8 hidden">
+        <div class="card rounded-3xl overflow-hidden">
+          <div class="relative">
+            <div class="aspect-[21/9]">
+              <img id="detailImg" class="w-full h-full object-cover opacity-70" loading="lazy" alt="Hotel cover" src="" />
+            </div>
+            <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.15), rgba(7,10,15,.92));"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+              <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div>
+                  <div class="text-xs text-white/55" id="detailLocation">—</div>
+                  <h2 class="font-display text-3xl sm:text-4xl" id="detailName">—</h2>
+                  <div class="mt-2 flex flex-wrap gap-2" id="detailTags"></div>
+                </div>
+                <div class="text-left sm:text-right">
+                  <div class="text-xs text-white/55">From</div>
+                  <div class="text-white/90">PKR <span class="text-3xl font-semibold" id="detailFrom">—</span><span class="text-xs text-white/55"> / night</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-6 sm:p-10 grid lg:grid-cols-12 gap-7">
+            <div class="lg:col-span-7">
+              <h3 class="font-display text-2xl">About this hotel</h3>
+              <p class="mt-3 text-white/60" id="detailAbout">—</p>
+
+              <div class="mt-6 grid sm:grid-cols-2 gap-3" id="detailHighlights"></div>
+
+              <div class="mt-7">
+                <div class="text-xs text-white/55">Nearby</div>
+                <div class="mt-2 grid sm:grid-cols-3 gap-3" id="detailNearby"></div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-5">
+              <div class="rounded-3xl bg-white/5 border border-white/10 p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-xs text-white/55">Room options</div>
+                    <div class="font-display text-xl">Pick your tier</div>
+                  </div>
+                  <div class="text-xs text-white/55" id="detailRating">—</div>
+                </div>
+
+                <div class="mt-4 grid gap-3" id="detailRoomCards"></div>
+
+                <div class="mt-5 divider"></div>
+
+                <div class="mt-5 flex flex-wrap gap-3">
+                  <button id="detailBookBtn" class="btn px-5 py-3 rounded-xl text-sm">Book this hotel</button>
+                  <button id="detailBackBtn" class="btn-ghost px-5 py-3 rounded-xl text-sm">Back to list</button>
+                </div>
+                <div class="mt-2 text-xs text-white/45">Login required to confirm booking.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGIN -->
+    <section id="view-login" class="view hidden">
+      <div class="grid lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-6">
+          <div class="card rounded-3xl overflow-hidden">
+            <div class="relative">
+              <div class="aspect-[16/9]">
+                <img class="w-full h-full object-cover opacity-70" loading="lazy" alt="Hotel reception" src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=60" />
+              </div>
+              <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.20), rgba(7,10,15,.92));"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+                <div class="text-xs text-white/55">Secure access</div>
+                <h1 class="font-display text-3xl sm:text-4xl">Login</h1>
+                <p class="mt-2 text-white/60">Users must login before booking. Admin login unlocks the dashboard.</p>
+              </div>
+            </div>
+
+            <div class="p-6 sm:p-10">
+              <form id="loginForm" class="grid gap-4" autocomplete="on">
+                <div>
+                  <label class="text-xs text-white/55">Email</label>
+                  <input class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="email" id="loginEmail" placeholder="you@example.com" required />
+                </div>
+                <div>
+                  <label class="text-xs text-white/55">Password</label>
+                  <input class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="password" id="loginPassword" placeholder="••••••••" required />
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <label class="flex items-center gap-2 text-xs text-white/55">
+                    <input id="loginAsAdmin" type="checkbox" class="accent-cyan-300" />
+                    Login as admin
+                  </label>
+                  <a href="#register" class="text-xs text-white/65 hover:text-white">Create an account →</a>
+                </div>
+                <button class="btn px-5 py-3 rounded-xl text-sm" type="submit">Login</button>
+
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 text-xs text-white/55">
+                  <div class="font-semibold text-white/70">Admin credentials</div>
+                  <div class="mt-1">Admin: <span class="text-white/80">admin@nocturne.stays</span> / <span class="text-white/80">Admin@2467</span></div>
+                  <div class="mt-1">Users can create an account from Register.</div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 grid gap-6">
+          <div class="card rounded-3xl p-6 sm:p-7">
+            <div class="text-xs text-white/55">Why login?</div>
+            <h2 class="mt-2 font-display text-2xl">Bookings need identity</h2>
+            <p class="mt-3 text-white/60">We capture your name and email for your receipt and allow admin approval for booking confirmation.</p>
+            <div class="mt-5 grid sm:grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Instant receipt PDF-style</div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Booking statuses</div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Admin approve/decline</div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">My Bookings history</div>
+            </div>
+          </div>
+
+          <div class="card rounded-3xl p-6 sm:p-7">
+            <div class="text-xs text-white/55">Security note</div>
+            <h3 class="mt-2 font-display text-2xl">Account security</h3>
+            <p class="mt-3 text-white/60">Use a strong password and keep your login details private. Your account is used for bookings and receipts.</p>
+            <a href="#help" class="mt-4 inline-flex btn-ghost px-4 py-2 rounded-xl text-sm">View policies →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section id="view-register" class="view hidden">
+      <div class="grid lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-5">
+          <div class="card rounded-3xl p-6 sm:p-10">
+            <div class="text-xs text-white/55">Create account</div>
+            <h1 class="mt-2 font-display text-3xl sm:text-4xl">Register</h1>
+            <p class="mt-3 text-white/60">Create a user account to book rooms and view receipts. Admin accounts are separate.</p>
+            <div class="mt-6 divider"></div>
+            <div class="mt-6 text-sm text-white/60">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl grid place-items-center bg-white/5 border border-white/10">1</div>
+                <div>
+                  <div class="font-semibold text-white/75">Register</div>
+                  <div class="text-xs text-white/55">Email + password</div>
+                </div>
+              </div>
+              <div class="mt-4 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl grid place-items-center bg-white/5 border border-white/10">2</div>
+                <div>
+                  <div class="font-semibold text-white/75">Login</div>
+                  <div class="text-xs text-white/55">Required before booking</div>
+                </div>
+              </div>
+              <div class="mt-4 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl grid place-items-center bg-white/5 border border-white/10">3</div>
+                <div>
+                  <div class="font-semibold text-white/75">Book & receive receipt</div>
+                  <div class="text-xs text-white/55">Pay at hotel</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="card rounded-3xl overflow-hidden">
+            <div class="relative">
+              <div class="aspect-[21/9]">
+                <img class="w-full h-full object-cover opacity-70" loading="lazy" alt="Hotel room" src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1600&q=60" />
+              </div>
+              <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.20), rgba(7,10,15,.92));"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+                <div class="text-xs text-white/55">Nocturne ID</div>
+                <h2 class="font-display text-2xl sm:text-3xl">Your profile, your receipts</h2>
+              </div>
+            </div>
+
+            <div class="p-6 sm:p-10">
+              <form id="registerForm" class="grid gap-4" autocomplete="on">
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs text-white/55">Full name</label>
+                    <input class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="text" id="regName" placeholder="Your name" required />
+                  </div>
+                  <div>
+                    <label class="text-xs text-white/55">Email</label>
+                    <input class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="email" id="regEmail" placeholder="you@example.com" required />
+                  </div>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs text-white/55">Password</label>
+                    <input class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="password" id="regPassword" placeholder="Min 8 chars" required />
+                  </div>
+                  <div>
+                    <label class="text-xs text-white/55">Confirm password</label>
+                    <input class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="password" id="regPassword2" placeholder="Repeat" required />
+                  </div>
+                </div>
+                <div class="text-xs text-white/50">
+                  By registering, you agree to pay at hotel and allow admin verification at check-in.
+                </div>
+                <button class="btn px-5 py-3 rounded-xl text-sm" type="submit">Create account</button>
+                <div class="text-xs text-white/55">Already have an account? <a href="#login" class="text-white/75 hover:text-white">Login →</a></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOOKING -->
+    <section id="view-booking" class="view hidden">
+      <div class="grid lg:grid-cols-12 gap-7 lg:gap-10 items-start">
+        <div class="lg:col-span-7">
+          <div class="card rounded-3xl p-6 sm:p-10">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-xs text-white/55">Booking</div>
+                <h1 class="mt-2 font-display text-3xl sm:text-4xl">Reserve your room</h1>
+                <p class="mt-2 text-white/60">Fill in details to generate your receipt. Payment is done at the hotel.</p>
+              </div>
+              <div class="hidden sm:block rounded-2xl bg-white/5 border border-white/10 p-4 text-right">
+                <div class="text-xs text-white/55">Status</div>
+                <div class="mt-1 text-sm font-semibold text-white/75">Pending admin approval</div>
+              </div>
+            </div>
+
+            <div class="mt-6 divider"></div>
+
+            <form id="bookingForm" class="mt-6 grid gap-4">
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs text-white/55">Hotel</label>
+                  <select id="bookHotel" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm"></select>
+                </div>
+                <div>
+                  <label class="text-xs text-white/55">Room tier</label>
+                  <select id="bookTier" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm">
+                    <option value="standard">Standard</option>
+                    <option value="deluxe">Deluxe</option>
+                    <option value="suite">Suite</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs text-white/55">Full name</label>
+                  <input id="bookName" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="text" placeholder="Guest name" required />
+                </div>
+                <div>
+                  <label class="text-xs text-white/55">Email</label>
+                  <input id="bookEmail" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="email" placeholder="guest@email.com" required />
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs text-white/55">Check-in</label>
+                  <input id="bookCheckin" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="date" required />
+                </div>
+                <div>
+                  <label class="text-xs text-white/55">Check-out</label>
+                  <input id="bookCheckout" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="date" required />
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs text-white/55">Guests</label>
+                  <input id="bookGuests" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="number" min="1" max="6" value="2" required />
+                </div>
+                <div>
+                  <label class="text-xs text-white/55">Phone (optional)</label>
+                  <input id="bookPhone" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" type="tel" placeholder="+92..." />
+                </div>
+              </div>
+
+              <div>
+                <label class="text-xs text-white/55">Special requests (optional)</label>
+                <textarea id="bookRequests" class="input w-full mt-1 px-4 py-3 rounded-xl text-sm" rows="3" placeholder="Quiet room, high floor, extra pillows..."></textarea>
+              </div>
+
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-xs text-white/55">Estimated total</div>
+                    <div class="text-2xl font-semibold" id="bookTotal">PKR —</div>
+                    <div class="text-xs text-white/45 mt-1">Paid at hotel. Receipt includes all details.</div>
+                  </div>
+                  <button class="btn px-5 py-3 rounded-xl text-sm" type="submit">Generate receipt & book</button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 grid gap-6">
+          <div class="card rounded-3xl p-6 sm:p-7">
+            <div class="text-xs text-white/55">Booking summary</div>
+            <h2 class="mt-2 font-display text-2xl">Your stay at a glance</h2>
+            <div class="mt-4 grid gap-3" id="bookingSummary"></div>
+          </div>
+
+          <div class="card rounded-3xl p-6 sm:p-7">
+            <div class="text-xs text-white/55">Policy</div>
+            <h3 class="mt-2 font-display text-2xl">Pay at hotel</h3>
+            <p class="mt-3 text-white/60">We don’t take payment online. Your room is reserved and marked as <span class="text-white/75">Pending</span> until an admin approves it.</p>
+            <div class="mt-4 grid sm:grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">ID required at check-in</div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">Refund rules vary per hotel</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY BOOKINGS -->
+    <section id="view-mybookings" class="view hidden">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+        <div>
+          <h1 class="font-display text-3xl sm:text-4xl">My Bookings</h1>
+          <p class="mt-2 text-white/60">View receipts, statuses, and history. Only visible when logged in as a user.</p>
+        </div>
+        <div class="flex gap-2">
+          <a href="#hotels" class="btn-ghost px-4 py-2 rounded-xl text-sm">Book another stay</a>
+        </div>
+      </div>
+
+      <div class="mt-8 grid lg:grid-cols-12 gap-7 lg:gap-10">
+        <div class="lg:col-span-8">
+          <div id="myBookingsList" class="grid gap-4"></div>
+        </div>
+        <aside class="lg:col-span-4">
+          <div class="card rounded-3xl p-6 sm:p-7 sticky top-24">
+            <div class="text-xs text-white/55">Tips</div>
+            <h2 class="mt-2 font-display text-2xl">Manage smoothly</h2>
+            <ul class="mt-3 space-y-2 text-sm text-white/60">
+              <li>• Pending bookings need admin approval.</li>
+              <li>• Your receipt contains booking ID and policy note.</li>
+              <li>• If declined, you can rebook a different date/tier.</li>
+            </ul>
+            <div class="mt-5 divider"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section id="view-admin" class="view hidden">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+        <div>
+          <h1 class="font-display text-3xl sm:text-4xl">Admin Dashboard</h1>
+          <p class="mt-2 text-white/60">Review all bookings, then approve or decline. (Admin-only.)</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="adminExport" class="btn-ghost px-4 py-2 rounded-xl text-sm">Export JSON</button>
+          <button id="adminClear" class="btn-ghost px-4 py-2 rounded-xl text-sm">Clear demo data</button>
+        </div>
+      </div>
+
+      <div class="mt-8 grid lg:grid-cols-12 gap-7 lg:gap-10">
+        <div class="lg:col-span-4">
+          <div class="card rounded-3xl p-6 sm:p-7">
+            <div class="text-xs text-white/55">Overview</div>
+            <h2 class="mt-2 font-display text-2xl">Bookings</h2>
+            <div class="mt-5 grid grid-cols-2 gap-3">
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Total</div>
+                <div class="text-2xl font-semibold" id="adminTotal">0</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Pending</div>
+                <div class="text-2xl font-semibold" id="adminPending">0</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Approved</div>
+                <div class="text-2xl font-semibold" id="adminApproved">0</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Declined</div>
+                <div class="text-2xl font-semibold" id="adminDeclined">0</div>
+              </div>
+            </div>
+            <div class="mt-5 divider"></div>
+            <div class="mt-5 text-xs text-white/50">
+              Admin actions update booking statuses instantly.
+            </div>
+          </div>
+
+          <div class="mt-6 card rounded-3xl p-6 sm:p-7">
+            <div class="text-xs text-white/55">Filters</div>
+            <h3 class="mt-2 font-display text-2xl">Status</h3>
+            <div class="mt-4 grid grid-cols-2 gap-2">
+              <button class="adminFilter btn-ghost px-3 py-2 rounded-xl text-sm" data-status="all">All</button>
+              <button class="adminFilter btn-ghost px-3 py-2 rounded-xl text-sm" data-status="pending">Pending</button>
+              <button class="adminFilter btn-ghost px-3 py-2 rounded-xl text-sm" data-status="approved">Approved</button>
+              <button class="adminFilter btn-ghost px-3 py-2 rounded-xl text-sm" data-status="declined">Declined</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8">
+          <div class="card rounded-3xl overflow-hidden">
+            <div class="p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div class="text-xs text-white/55">Queue</div>
+                <div class="font-display text-2xl">All booking requests</div>
+              </div>
+              <div class="flex gap-2">
+                <input id="adminSearch" class="input px-4 py-2 rounded-xl text-sm w-[min(92vw,320px)]" placeholder="Search by name, email, booking ID" />
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div id="adminTable" class="p-6 sm:p-7 grid gap-4"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HELP -->
+    <section id="view-help" class="view hidden">
+      <div class="card rounded-3xl p-6 sm:p-10">
+        <div class="text-xs text-white/55">Help</div>
+        <h1 class="mt-2 font-display text-3xl sm:text-4xl">Policies & Support</h1>
+        <p class="mt-3 text-white/60 max-w-4xl">Find booking policies, check-in rules, and support information. For questions, contact the front desk of your selected hotel.</p>
+
+        <div class="mt-10 grid lg:grid-cols-12 gap-7 lg:gap-10">
+          <div class="lg:col-span-6 rounded-3xl bg-white/5 border border-white/10 p-6">
+            <h2 class="font-display text-2xl">Booking policy</h2>
+            <ul class="mt-4 space-y-3 text-sm text-white/65">
+              <li class="flex gap-2"><span class="text-cyan-300/80">•</span> Your booking is created with status <span class="text-white/80">Pending</span> until admin approval.</li>
+              <li class="flex gap-2"><span class="text-cyan-300/80">•</span> Please bring a valid ID for verification at check-in.</li>
+              <li class="flex gap-2"><span class="text-cyan-300/80">•</span> Payment is done at the hotel reception at check-in or checkout (hotel policy).</li>
+            </ul>
+          </div>
+
+          <div class="lg:col-span-6 rounded-3xl bg-white/5 border border-white/10 p-6">
+            <h2 class="font-display text-2xl">Check-in & check-out</h2>
+            <div class="mt-4 grid sm:grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Standard check-in</div>
+                <div class="mt-1 font-semibold">2:00 PM</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Standard check-out</div>
+                <div class="mt-1 font-semibold">12:00 PM</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Late checkout</div>
+                <div class="mt-1 font-semibold">On request</div>
+                <div class="mt-1 text-xs text-white/55">Subject to availability</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="text-xs text-white/55">Cancellation</div>
+                <div class="mt-1 font-semibold">Varies by hotel</div>
+                <div class="mt-1 text-xs text-white/55">Ask reception for details</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-3xl bg-white/5 border border-white/10 p-6">
+          <h2 class="font-display text-2xl">FAQs</h2>
+          <div class="mt-4 grid gap-3 text-sm text-white/65">
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+              <div class="font-semibold text-white/80">Do I need an account to book?</div>
+              <div class="mt-1 text-xs text-white/55">Yes. Login is required so your receipt and booking history are saved.</div>
+            </div>
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+              <div class="font-semibold text-white/80">How do I see my receipt again?</div>
+              <div class="mt-1 text-xs text-white/55">Go to <span class="text-white/80">My Bookings</span> and open the receipt.</div>
+            </div>
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+              <div class="font-semibold text-white/80">When is my booking confirmed?</div>
+              <div class="mt-1 text-xs text-white/55">After admin approval. The status updates automatically in your booking list.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-10 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Brand -->
+        <div class="lg:col-span-1">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl grid place-items-center" style="background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.10);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-90">
+                <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5Z" stroke="white" stroke-opacity="0.9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="font-display text-lg tracking-wide">Nocturne Stays</div>
+          </div>
+          <p class="text-sm text-white/60">Luxury hotel bookings with instant receipts and admin approval workflow.</p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h3 class="text-sm font-semibold text-white/80 mb-4">Quick Links</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#home" class="text-white/60 hover:text-white transition">Home</a></li>
+            <li><a href="#hotels" class="text-white/60 hover:text-white transition">Hotels</a></li>
+            <li><a href="#help" class="text-white/60 hover:text-white transition">FAQs & Policies</a></li>
+            <li><a href="#login" class="text-white/60 hover:text-white transition">Login / Register</a></li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div>
+          <h3 class="text-sm font-semibold text-white/80 mb-4">Support</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#mybookings" class="text-white/60 hover:text-white transition">My Bookings</a></li>
+            <li><a href="#help" class="text-white/60 hover:text-white transition">Check-in Policy</a></li>
+            <li><a href="#help" class="text-white/60 hover:text-white transition">Cancellation</a></li>
+            <li><span class="text-white/60">24/7 Concierge</span></li>
+          </ul>
+        </div>
+
+        <!-- Social Media -->
+        <div>
+          <h3 class="text-sm font-semibold text-white/80 mb-4">Follow Us</h3>
+          <div class="flex gap-3 mb-4">
+            <a href="https://www.facebook.com" target="_blank" class="w-10 h-10 rounded-xl grid place-items-center btn-ghost" aria-label="Facebook">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 9h3V6h-3c-1.657 0-3 1.343-3 3v3H8v3h3v6h3v-6h3l1-3h-4V9c0-.552.448-1 1-1z" stroke="white" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com" target="_blank" class="w-10 h-10 rounded-xl grid place-items-center btn-ghost" aria-label="Instagram">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="18" height="18" rx="5" stroke="white" stroke-opacity="0.8" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="4" stroke="white" stroke-opacity="0.8" stroke-width="1.5"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="white" fill-opacity="0.8"/>
+              </svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" class="w-10 h-10 rounded-xl grid place-items-center btn-ghost" aria-label="Twitter">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 5.9c-.7.3-1.4.5-2.1.6.8-.5 1.3-1.2 1.6-2.1-.8.5-1.6.8-2.5 1-1.4-1.5-3.8-1.6-5.3-.2-1.1 1-1.5 2.5-1.1 3.9-3-.2-5.8-1.6-7.6-3.9-1 1.8-.5 4.1 1.2 5.3-.6 0-1.2-.2-1.7-.5 0 2.1 1.5 3.9 3.6 4.3-.4.1-.8.2-1.2.2-.3 0-.6 0-.9-.1.6 1.8 2.3 3.1 4.3 3.1-1.6 1.2-3.6 1.9-5.6 1.9-.4 0-.7 0-1.1-.1 2.1 1.3 4.5 2 7 2 8.4 0 13-7.1 12.7-13.4.9-.6 1.6-1.4 2.2-2.3z" stroke="white" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <a href="https://www.linkedin.com" target="_blank" class="w-10 h-10 rounded-xl grid place-items-center btn-ghost" aria-label="LinkedIn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V24h-4V8.5zM8.5 8.5h3.84v2.1h.05c.53-1 1.84-2.06 3.78-2.06 4.04 0 4.79 2.66 4.79 6.12V24h-4v-7.2c0-1.72-.03-3.93-2.4-3.93-2.4 0-2.77 1.87-2.77 3.8V24h-4V8.5z" stroke="white" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+          <p class="text-xs text-white/50">Stay connected for exclusive offers and updates.</p>
+        </div>
+      </div>
+
+      <div class="divider my-8"></div>
+
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="text-xs text-white/45">© 2024 Nocturne Stays. All rights reserved.</div>
+        <div class="text-xs text-white/45">Designed By Owais Ahmed 2467-2024</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Receipt Modal -->
+  <div id="receiptModal" class="fixed inset-0 z-[70] hidden">
+    <div class="absolute inset-0 bg-black/70" data-close="receipt"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
+      <div class="w-[min(980px,96vw)] max-h-[88vh] overflow-auto rounded-3xl card">
+        <div class="p-6 sm:p-8">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-xs text-white/55">Receipt</div>
+              <div class="mt-1 font-display text-2xl sm:text-3xl">Nocturne Stays — Booking Confirmation</div>
+              <div class="mt-2 text-xs text-white/55">This receipt is generated instantly. Payment is due at hotel.</div>
+            </div>
+            <button class="btn-ghost px-3 py-2 rounded-xl text-sm" data-close="receipt">Close</button>
+          </div>
+
+          <div class="mt-6 divider"></div>
+
+          <div id="receiptBody" class="mt-6 grid gap-4"></div>
+
+          <div class="mt-6 rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div class="text-sm font-semibold">Pay at hotel</div>
+                <div class="text-xs text-white/55 mt-1">Your room has been booked. Please present your booking ID at check-in and pay at the hotel.</div>
+              </div>
+              <div class="flex gap-2">
+                <button id="receiptPrint" class="btn px-4 py-2 rounded-xl text-sm">Print</button>
+                <button id="receiptCopy" class="btn-ghost px-4 py-2 rounded-xl text-sm">Copy details</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 text-xs text-white/45">Designed By Owais Ahmed 2467-2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Data
+    // -----------------------------
+    let HOTELS = [
+      {
+        id: 'h1',
+        name: 'Nebula Inn',
+        city: 'Karachi',
+        location: 'Karachi • Clifton • 9 min from Seaview',
+        from: 8900,
+        rating: 4.3,
+        tags: ['Budget', 'City', 'Fast Wi‑Fi'],
+        image: 'https://images.unsplash.com/photo-1554009975-d74653b879f1?auto=format&fit=crop&w=1800&q=60',
+        about: 'A clean, minimalist city hotel with quiet floors, fast Wi‑Fi, and a solid restaurant. Perfect for quick business stays and short weekend resets.',
+        highlights: [
+          { title: 'Quiet floors', desc: 'Acoustic insulation + blackout curtains' },
+          { title: 'Fast Wi‑Fi', desc: 'Work-ready bandwidth included' },
+          { title: 'Breakfast', desc: 'Continental + local options' },
+          { title: 'Parking', desc: 'Secure underground parking' }
+        ],
+        nearby: ['Seaview', 'Dolmen Mall', 'Boat Basin'],
+        amenityBoost: 0
+      },
+      {
+        id: 'h2',
+        name: 'Aurum Residence',
+        city: 'Lahore',
+        location: 'Lahore • Gulberg • 12 min from MM Alam',
+        from: 12900,
+        rating: 4.5,
+        tags: ['Modern', 'Rooftop', 'Great value'],
+        image: 'https://images.unsplash.com/photo-1535827841776-24afc1e255ac?auto=format&fit=crop&w=1800&q=60',
+        about: 'Modern interiors with warm lighting, a rooftop lounge, and consistently strong service. A balanced pick for comfort without premium pricing.',
+        highlights: [
+          { title: 'Rooftop lounge', desc: 'Sunset seating + late-night menu' },
+          { title: 'Gym', desc: 'Cardio + free weights' },
+          { title: 'Airport pickup', desc: 'Available on request' },
+          { title: 'Family-friendly', desc: 'Spacious layouts available' }
+        ],
+        nearby: ['MM Alam Road', 'Liberty Market', 'Jilani Park'],
+        amenityBoost: 0.05
+      },
+      {
+        id: 'h3',
+        name: 'Velvet Quarters',
+        city: 'Islamabad',
+        location: 'Islamabad • Blue Area • 6 min from Centaurus',
+        from: 17800,
+        rating: 4.7,
+        tags: ['Boutique', 'Spa', 'Quiet'],
+        image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1800&q=60',
+        about: 'Boutique feel with a high-end spa, silent corridors, and a refined dark aesthetic. Excellent for couples and long-stay guests.',
+        highlights: [
+          { title: 'Spa & sauna', desc: 'Signature treatments + steam room' },
+          { title: 'Quiet guarantee', desc: 'Dedicated silent floors' },
+          { title: 'Restaurant', desc: 'Chef-led seasonal menu' },
+          { title: 'Late checkout', desc: 'Subject to admin approval' }
+        ],
+        nearby: ['Centaurus Mall', 'F-6 Markaz', 'Faisal Mosque'],
+        amenityBoost: 0.10
+      },
+      {
+        id: 'h4',
+        name: 'Obsidian Grand',
+        city: 'Murree',
+        location: 'Murree • Ridge Road • Forest views',
+        from: 24500,
+        rating: 4.8,
+        tags: ['Mountain', 'Infinity pool', 'Premium'],
+        image: 'https://images.unsplash.com/photo-1541971875076-8f970d573be6?auto=format&fit=crop&w=1800&q=60',
+        about: 'A premium mountain property with a heated infinity pool, panoramic views, and an iconic lounge that leans into the nocturne theme.',
+        highlights: [
+          { title: 'Infinity pool', desc: 'Heated + view deck' },
+          { title: 'Concierge', desc: 'Curated local experiences' },
+          { title: 'Fireplace lounge', desc: 'Warm drinks + live music nights' },
+          { title: 'View rooms', desc: 'Forest or ridge panoramas' }
+        ],
+        nearby: ['Mall Road', 'Patriata', 'Pindi Point'],
+        amenityBoost: 0.16
+      },
+      {
+        id: 'h5',
+        name: 'Eclipse Palace',
+        city: 'Dubai',
+        location: 'Dubai • Downtown • Skyline & fountain views',
+        from: 39900,
+        rating: 4.9,
+        tags: ['Ultra luxury', 'Skyline', 'Suite-first'],
+        image: 'https://images.unsplash.com/photo-1598605272254-16f0c0ecdfa5?auto=format&fit=crop&w=1800&q=60',
+        about: 'Ultra-luxury skyline stay with suites that feel cinematic: curated fragrance, premium linen, and concierge-level support for every request.',
+        highlights: [
+          { title: 'Suite-first', desc: 'Largest layouts + lounge areas' },
+          { title: 'Concierge', desc: '24/7 premium assistance' },
+          { title: 'Private transfers', desc: 'Luxury pickup available' },
+          { title: 'Dining', desc: 'Chef tables + rooftop bar' }
+        ],
+        nearby: ['Dubai Mall', 'Burj Khalifa', 'Fountain Walk'],
+        amenityBoost: 0.24
+      }
+    ].sort((a,b)=>a.from-b.from);
+
+    async function hydrateHotelsFromAPI(){
+      try{
+        const data = await apiFetch('/api/hotels');
+        if(Array.isArray(data?.hotels) && data.hotels.length){
+          HOTELS = data.hotels.sort((a,b)=>a.from-b.from);
+          selectedHotelId = HOTELS[0]?.id;
+        }
+      }catch(err){
+        // If API not available, keep built-in HOTELS (offline fallback)
+        console.warn('Hotel API not available. Using built-in hotel list.', err);
+      }
+    }
+
+    const ROOM_TIERS = {
+      standard: { label: 'Standard', multiplier: 1.0, perks: ['Queen bed', 'Rainfall shower', 'Work desk'] },
+      deluxe:   { label: 'Deluxe', multiplier: 1.35, perks: ['More space', 'Better view', 'Priority check-in'] },
+      suite:    { label: 'Suite', multiplier: 1.85, perks: ['Separate lounge', 'Concierge', 'Late checkout request'] }
+    };
+
+    // -----------------------------
+    // API / Session (JWT)
+    // -----------------------------
+    const API_BASE = '';
+    const LS = {
+      session: 'ns_session_v2'
+    };
+
+    function loadJSON(key, fallback){
+      try{ return JSON.parse(localStorage.getItem(key) || '') ?? fallback; }catch{ return fallback; }
+    }
+    function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+    function getSession(){ return loadJSON(LS.session, null); }
+    function setSession(sess){ saveJSON(LS.session, sess); }
+    function clearSession(){ localStorage.removeItem(LS.session); }
+
+    async function apiFetch(path, opts={}){
+      const sess = getSession();
+      const headers = Object.assign({
+        'Content-Type': 'application/json'
+      }, opts.headers || {});
+      if(sess?.token) headers.Authorization = `Bearer ${sess.token}`;
+
+      const res = await fetch(API_BASE + path, {
+        ...opts,
+        headers
+      });
+
+      let data = null;
+      const ct = res.headers.get('content-type') || '';
+      if(ct.includes('application/json')){
+        data = await res.json().catch(()=>null);
+      } else {
+        data = await res.text().catch(()=>null);
+      }
+
+      if(!res.ok){
+        const msg = (data && data.error) ? data.error : `Request failed (${res.status})`;
+        const err = new Error(msg);
+        err.status = res.status;
+        throw err;
+      }
+      return data;
+    }
+
+    // -----------------------------
+    // Utils
+    // -----------------------------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function moneyPKR(n){
+      const v = Math.round(Number(n)||0);
+      return v.toLocaleString('en-PK');
+    }
+
+    function nightsBetween(checkin, checkout){
+      const a = new Date(checkin);
+      const b = new Date(checkout);
+      const diff = Math.round((b - a) / (1000*60*60*24));
+      return diff;
+    }
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function uid(prefix='B'){
+      // pseudo-unique booking code
+      const rand = Math.random().toString(16).slice(2, 10).toUpperCase();
+      const ts = Date.now().toString(36).toUpperCase();
+      return `${prefix}-${ts}-${rand}`;
+    }
+
+    async function sha256(str){
+      const enc = new TextEncoder().encode(str);
+      const hash = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function toast(type, title, msg){
+      const el = document.createElement('div');
+      const color = type==='good' ? 'rgba(52,211,153,.18)' : type==='bad' ? 'rgba(251,113,133,.18)' : 'rgba(251,191,36,.16)';
+      const dot = type==='good' ? 'bg-emerald-300/80' : type==='bad' ? 'bg-rose-300/80' : 'bg-amber-300/80';
+      el.className = 'card rounded-2xl p-4 border border-white/10';
+      el.innerHTML = `
+        <div class="flex gap-3">
+          <div class="mt-1 w-2.5 h-2.5 rounded-full ${dot}"></div>
+          <div class="min-w-0">
+            <div class="text-sm font-semibold" style="color: rgba(255,255,255,.88)">${escapeHTML(title)}</div>
+            <div class="text-xs mt-1" style="color: rgba(255,255,255,.60)">${escapeHTML(msg)}</div>
+          </div>
+          <button class="ml-auto text-white/50 hover:text-white/80 text-xs" aria-label="Dismiss">✕</button>
+        </div>
+      `;
+      el.style.background = `linear-gradient(180deg, ${color}, rgba(255,255,255,.03))`;
+      const close = el.querySelector('button');
+      close.addEventListener('click', ()=> el.remove());
+      $('#toasts').appendChild(el);
+      setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(-6px)'; el.style.transition='opacity .5s ease, transform .5s ease'; }, 4200);
+      setTimeout(()=> el.remove(), 4900);
+    }
+
+    function escapeHTML(s){
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function ensureDates(){
+      const today = new Date();
+      const in1 = new Date(today); in1.setDate(in1.getDate()+1);
+      const out2 = new Date(today); out2.setDate(out2.getDate()+3);
+      const fmt = (d)=> d.toISOString().slice(0,10);
+      const checkin = fmt(in1);
+      const checkout = fmt(out2);
+      for (const id of ['quickCheckin','bookCheckin']) if($("#"+id) && !$("#"+id).value) $("#"+id).value = checkin;
+      for (const id of ['quickCheckout','bookCheckout']) if($("#"+id) && !$("#"+id).value) $("#"+id).value = checkout;
+    }
+
+    // -----------------------------
+    // Router / Views
+    // -----------------------------
+    const VIEWS = ['home','hotels','login','register','booking','admin','mybookings','help'];
+
+    function getHashView(){
+      const hash = location.hash.replace('#','').trim();
+      if (!hash) return 'home';
+      const [base] = hash.split('?');
+      return VIEWS.includes(base) ? base : 'home';
+    }
+
+    function showView(name){
+      for(const v of VIEWS){
+        const el = $('#view-'+v);
+        if(!el) continue;
+        el.classList.toggle('hidden', v!==name);
+      }
+      // close mobile menu
+      $('#mobileMenu')?.classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateNavAuthVisibility();
+
+      // view-specific refresh
+      if(name==='hotels') renderHotels();
+      if(name==='booking') prepareBookingView();
+      if(name==='admin') renderAdmin();
+      if(name==='mybookings') renderMyBookings();
+
+      // ensure dates set
+      ensureDates();
+    }
+
+    window.addEventListener('hashchange', ()=>{
+      const v = getHashView();
+      guardRoute(v);
+    });
+
+    function guardRoute(view){
+      const sess = getSession();
+      if(view==='booking'){
+        if(!sess || sess.role!=='user'){
+          setPendingRedirect('#booking');
+          location.hash = '#login';
+          toast('warn','Login required','Please login to book a room.');
+          return;
+        }
+      }
+      if(view==='mybookings'){
+        if(!sess || sess.role!=='user'){
+          setPendingRedirect('#mybookings');
+          location.hash = '#login';
+          toast('warn','Login required','Please login to view your bookings.');
+          return;
+        }
+      }
+      if(view==='admin'){
+        if(!sess || sess.role!=='admin'){
+          setPendingRedirect('#admin');
+          location.hash = '#login';
+          toast('warn','Admin access','Login as admin to open the dashboard.');
+          return;
+        }
+      }
+      showView(view);
+    }
+
+    function setPendingRedirect(hash){
+      const sess = getSession() || {};
+      sess.redirectAfterLogin = hash;
+      setSession(sess);
+    }
+
+    function consumeRedirect(){
+      const sess = getSession();
+      if(sess?.redirectAfterLogin){
+        const h = sess.redirectAfterLogin;
+        delete sess.redirectAfterLogin;
+        setSession(sess);
+        return h;
+      }
+      return null;
+    }
+
+    // -----------------------------
+    // Session UI
+    // -----------------------------
+    function updateSessionUI(){
+      const sess = getSession();
+      const badge = $('#sessionBadge');
+      const btnAuth = $('#btnAuth');
+      const btnLogout = $('#btnLogout');
+      badge.classList.remove('hidden');
+
+      if(sess?.email){
+        $('#sessionName').textContent = sess.name || sess.email;
+        $('#sessionRole').textContent = sess.role === 'admin' ? 'Admin' : 'User';
+        $('#sessionDot').style.background = sess.role === 'admin' ? 'rgba(251,191,36,.9)' : 'rgba(52,211,153,.9)';
+        btnAuth.classList.add('hidden');
+        btnLogout.classList.remove('hidden');
+      } else {
+        $('#sessionName').textContent = 'Guest';
+        $('#sessionRole').textContent = 'Not signed in';
+        $('#sessionDot').style.background = 'rgba(255,255,255,.35)';
+        btnAuth.classList.remove('hidden');
+        btnLogout.classList.add('hidden');
+      }
+      updateNavAuthVisibility();
+    }
+
+    function updateNavAuthVisibility(){
+      const sess = getSession();
+      const role = sess?.role;
+      $$('[data-auth="user"]').forEach(a=> a.classList.toggle('hidden', role!=='user'));
+      $$('[data-auth="admin"]').forEach(a=> a.classList.toggle('hidden', role!=='admin'));
+    }
+
+    // -----------------------------
+    // Hotels rendering
+    // -----------------------------
+    let hotelsSortAsc = true;
+    let cityFilter = 'All';
+    let selectedHotelId = HOTELS[0]?.id;
+    let selectedTier = 'standard';
+
+    function renderHotels(){
+      const grid = $('#hotelGrid');
+      if(!grid) return;
+
+      const cities = ['All', ...Array.from(new Set(HOTELS.map(h=>h.city)))];
+      // Update filter button label
+      $('#filterCity').textContent = `Filter: ${cityFilter}`;
+
+      let list = [...HOTELS];
+      if(cityFilter !== 'All') list = list.filter(h=>h.city===cityFilter);
+      list.sort((a,b)=> hotelsSortAsc ? (a.from-b.from) : (b.from-a.from));
+
+      // Keep selection valid
+      if(!list.find(h=>h.id===selectedHotelId)) selectedHotelId = list[0]?.id || HOTELS[0]?.id;
+
+      grid.innerHTML = '';
+      list.forEach((h, idx)=>{
+        const el = document.createElement('article');
+        const isSel = h.id===selectedHotelId;
+        el.className = `card rounded-3xl overflow-hidden group cursor-pointer ${isSel ? 'ring-2 ring-white/20' : ''}`;
+        el.setAttribute('tabindex','0');
+        el.innerHTML = `
+          <div class="relative">
+            <div class="aspect-[16/10]">
+              <img class="w-full h-full object-cover opacity-75 group-hover:opacity-90 transition" loading="lazy" alt="${escapeHTML(h.name)}" src="${h.image}">
+            </div>
+            <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(7,10,15,.15), rgba(7,10,15,.90));"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-5">
+              <div class="flex items-end justify-between gap-4">
+                <div class="min-w-0">
+                  <div class="text-xs text-white/55">${escapeHTML(h.location)}</div>
+                  <div class="mt-1 font-display text-xl truncate">${escapeHTML(h.name)}</div>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    ${h.tags.slice(0,3).map(t=>`<span class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-white/70">${escapeHTML(t)}</span>`).join('')}
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-white/55">From</div>
+                  <div class="text-white/85">PKR <span class="text-2xl font-semibold">${moneyPKR(h.from)}</span></div>
+                  <div class="text-xs text-white/55">⭐ ${h.rating.toFixed(1)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-white/60 line-clamp-2">${escapeHTML(h.about)}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="text-xs text-white/50">Tier ${idx+1} of 5</div>
+              <button class="btn-ghost px-3 py-2 rounded-xl text-xs">View details →</button>
+            </div>
+          </div>
+        `;
+        el.addEventListener('click', ()=> selectHotel(h.id, true));
+        el.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectHotel(h.id, true); } });
+        grid.appendChild(el);
+      });
+
+      // update side panel selection
+      const selected = HOTELS.find(h=>h.id===selectedHotelId) || HOTELS[0];
+      $('#selectedHotelName').textContent = selected?.name || '—';
+      $('#selectedHotelPrice').textContent = selected ? moneyPKR(selected.from) : '—';
+      $('#selectedHotelDesc').textContent = selected?.about || 'Pick a hotel from the left to see details here.';
+
+      // Ensure tier buttons state
+      $$('.roomTierBtn').forEach(b=>{
+        const active = b.dataset.tier===selectedTier;
+        b.classList.toggle('ring-2', active);
+        b.classList.toggle('ring-violet-300/30', active);
+        b.classList.toggle('bg-white/8', active);
+      });
+
+      $('#tierHint').textContent = selected ? `${ROOM_TIERS[selectedTier].label}: PKR ${moneyPKR(ratePerNight(selected, selectedTier))}/night` : 'Select a tier to see the estimate.';
+      updateQuickEstimate();
+
+      // Render detail section if open
+      if(!$('#hotelDetail').classList.contains('hidden')) renderHotelDetail();
+
+      // Update home from price (cheapest)
+      const cheapest = HOTELS[0];
+      if($('#homeFromPrice') && cheapest) $('#homeFromPrice').textContent = moneyPKR(cheapest.from);
+
+      // Update filter chooser prompt (cycle)
+      $('#filterCity').onclick = ()=>{
+        const i = cities.indexOf(cityFilter);
+        cityFilter = cities[(i+1) % cities.length];
+        renderHotels();
+      };
+    }
+
+    function selectHotel(id, openDetail=false){
+      selectedHotelId = id;
+      renderHotels();
+      if(openDetail){
+        $('#hotelDetail').classList.remove('hidden');
+        renderHotelDetail();
+        setTimeout(()=> $('#hotelDetail').scrollIntoView({behavior:'smooth', block:'start'}), 50);
+      }
+    }
+
+    function ratePerNight(hotel, tier){
+      const base = hotel.from;
+      const mult = ROOM_TIERS[tier]?.multiplier ?? 1;
+      const amenity = (1 + (hotel.amenityBoost || 0));
+      return Math.round(base * mult * amenity);
+    }
+
+    function updateQuickEstimate(){
+      const h = HOTELS.find(x=>x.id===selectedHotelId);
+      const inD = $('#quickCheckin')?.value;
+      const outD = $('#quickCheckout')?.value;
+      if(!h || !inD || !outD){
+        $('#quickEstimate').textContent = 'PKR —';
+        return;
+      }
+      const nights = nightsBetween(inD, outD);
+      if(!Number.isFinite(nights) || nights<=0){
+        $('#quickEstimate').textContent = 'PKR —';
+        return;
+      }
+      const total = nights * ratePerNight(h, selectedTier);
+      $('#quickEstimate').textContent = `PKR ${moneyPKR(total)}`;
+    }
+
+    function renderHotelDetail(){
+      const h = HOTELS.find(x=>x.id===selectedHotelId);
+      if(!h) return;
+      $('#detailImg').src = h.image;
+      $('#detailLocation').textContent = h.location;
+      $('#detailName').textContent = h.name;
+      $('#detailFrom').textContent = moneyPKR(h.from);
+      $('#detailAbout').textContent = h.about;
+      $('#detailRating').textContent = `⭐ ${h.rating.toFixed(1)} rating`;
+      $('#detailTags').innerHTML = h.tags.map(t=>`<span class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-white/70">${escapeHTML(t)}</span>`).join('');
+
+      $('#detailHighlights').innerHTML = h.highlights.map(x=>`
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+          <div class="text-sm font-semibold">${escapeHTML(x.title)}</div>
+          <div class="text-xs text-white/55 mt-1">${escapeHTML(x.desc)}</div>
+        </div>
+      `).join('');
+
+      $('#detailNearby').innerHTML = h.nearby.map(n=>`
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4 text-sm text-white/70">${escapeHTML(n)}</div>
+      `).join('');
+
+      // room cards
+      const roomWrap = $('#detailRoomCards');
+      roomWrap.innerHTML = '';
+      for(const [tier, info] of Object.entries(ROOM_TIERS)){
+        const price = ratePerNight(h, tier);
+        const active = tier===selectedTier;
+        const card = document.createElement('button');
+        card.className = `text-left rounded-2xl border p-4 transition ${active ? 'bg-white/8 border-cyan-300/30 ring-2 ring-cyan-300/20' : 'bg-white/5 border-white/10 hover:bg-white/7'}`;
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-sm font-semibold">${escapeHTML(info.label)}</div>
+              <div class="text-xs text-white/55 mt-1">${info.perks.slice(0,2).map(escapeHTML).join(' • ')}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-white/55">PKR/night</div>
+              <div class="text-lg font-semibold">${moneyPKR(price)}</div>
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', ()=>{
+          selectedTier = tier;
+          renderHotels();
+          renderHotelDetail();
+        });
+        roomWrap.appendChild(card);
+      }
+
+      $('#detailBookBtn').onclick = ()=>{
+        // Navigate to booking with selection
+        location.hash = '#booking';
+        setTimeout(()=>{
+          $('#bookHotel').value = selectedHotelId;
+          $('#bookTier').value = selectedTier;
+          updateBookingTotals();
+        }, 0);
+      };
+      $('#detailBackBtn').onclick = ()=>{
+        $('#hotelDetail').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+    }
+
+    // -----------------------------
+    // Booking
+    // -----------------------------
+    function prepareBookingView(){
+      const sess = getSession();
+      // populate hotels
+      const sel = $('#bookHotel');
+      sel.innerHTML = HOTELS.map(h=>`<option value="${h.id}">${escapeHTML(h.name)} — from PKR ${moneyPKR(h.from)}/night</option>`).join('');
+
+      // prefill from session
+      $('#bookName').value = sess?.name || '';
+      $('#bookEmail').value = sess?.email || '';
+
+      // if arrived from hotel selection, keep it
+      if(selectedHotelId) sel.value = selectedHotelId;
+      $('#bookTier').value = selectedTier || 'standard';
+
+      ensureDates();
+      updateBookingTotals();
+
+      // bind listeners (idempotent)
+      for(const id of ['bookHotel','bookTier','bookCheckin','bookCheckout','bookGuests']){
+        const el = $('#'+id);
+        el.oninput = updateBookingTotals;
+        el.onchange = updateBookingTotals;
+      }
+      // Summary live preview
+      for(const id of ['bookName','bookEmail','bookPhone','bookRequests']){
+        const el = $('#'+id);
+        el.oninput = updateBookingSummary;
+      }
+      updateBookingSummary();
+    }
+
+    function updateBookingTotals(){
+      const hid = $('#bookHotel').value;
+      const tier = $('#bookTier').value;
+      const h = HOTELS.find(x=>x.id===hid);
+      selectedHotelId = hid;
+      selectedTier = tier;
+
+      const checkin = $('#bookCheckin').value;
+      const checkout = $('#bookCheckout').value;
+      let nights = nightsBetween(checkin, checkout);
+      if(!Number.isFinite(nights)) nights = 0;
+
+      const guests = clamp(parseInt($('#bookGuests').value||'1',10), 1, 6);
+      $('#bookGuests').value = guests;
+
+      if(!h || nights<=0){
+        $('#bookTotal').textContent = 'PKR —';
+        updateBookingSummary();
+        return;
+      }
+
+      const rate = ratePerNight(h, tier);
+      // simple guest adjustment: +8% per guest above 2 (capacity/services)
+      const guestAdj = 1 + Math.max(0, (guests-2))*0.08;
+      const total = Math.round(nights * rate * guestAdj);
+
+      $('#bookTotal').textContent = `PKR ${moneyPKR(total)}`;
+      updateBookingSummary({nights, rate, total});
+    }
+
+    function updateBookingSummary(calc){
+      const hid = $('#bookHotel')?.value;
+      const tier = $('#bookTier')?.value;
+      const h = HOTELS.find(x=>x.id===hid);
+      if(!h) return;
+
+      const checkin = $('#bookCheckin')?.value || '—';
+      const checkout = $('#bookCheckout')?.value || '—';
+      const guests = $('#bookGuests')?.value || '—';
+      const name = $('#bookName')?.value || '—';
+      const email = $('#bookEmail')?.value || '—';
+      const phone = $('#bookPhone')?.value || '—';
+      const requests = ($('#bookRequests')?.value || '').trim();
+
+      const nights = calc?.nights ?? nightsBetween(checkin, checkout);
+      const rate = calc?.rate ?? ratePerNight(h, tier);
+      const total = calc?.total ?? 0;
+
+      $('#bookingSummary').innerHTML = `
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+          <div class="text-xs text-white/55">Hotel</div>
+          <div class="mt-1 text-lg font-semibold">${escapeHTML(h.name)}</div>
+          <div class="text-xs text-white/55 mt-1">${escapeHTML(h.location)}</div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Room tier</div>
+            <div class="mt-1 text-sm font-semibold">${escapeHTML(ROOM_TIERS[tier]?.label || tier)}</div>
+            <div class="mt-1 text-xs text-white/55">Rate: PKR ${moneyPKR(rate)}/night</div>
+          </div>
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Dates</div>
+            <div class="mt-1 text-sm font-semibold">${escapeHTML(checkin)} → ${escapeHTML(checkout)}</div>
+            <div class="mt-1 text-xs text-white/55">Nights: ${Number.isFinite(nights) && nights>0 ? nights : '—'}</div>
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Guest</div>
+            <div class="mt-1 text-sm font-semibold">${escapeHTML(name)}</div>
+            <div class="mt-1 text-xs text-white/55">${escapeHTML(email)}</div>
+          </div>
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Guests</div>
+            <div class="mt-1 text-sm font-semibold">${escapeHTML(guests)}</div>
+            <div class="mt-1 text-xs text-white/55">Phone: ${escapeHTML(phone)}</div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+          <div class="text-xs text-white/55">Special requests</div>
+          <div class="mt-2 text-sm text-white/65">${requests ? escapeHTML(requests) : '<span class="text-white/45">None</span>'}</div>
+        </div>
+
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-white/55">Estimated total</div>
+              <div class="mt-1 text-2xl font-semibold">${total ? ('PKR ' + moneyPKR(total)) : 'PKR —'}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-white/55">Payment</div>
+              <div class="text-sm font-semibold">Pay at hotel</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function createBookingFromForm(){
+      const sess = getSession();
+      if(!sess || sess.role!=='user') throw new Error('Login required');
+
+      const hotelId = $('#bookHotel').value;
+      const roomTier = $('#bookTier').value;
+
+      const guestName = $('#bookName').value.trim();
+      const guestEmail = $('#bookEmail').value.trim().toLowerCase();
+      const phone = $('#bookPhone').value.trim();
+      const checkin = $('#bookCheckin').value;
+      const checkout = $('#bookCheckout').value;
+      const guests = clamp(parseInt($('#bookGuests').value||'1',10), 1, 6);
+      const requests = $('#bookRequests').value.trim();
+
+      const payload = {
+        hotelId,
+        roomTier,
+        guestName,
+        guestEmail,
+        phone,
+        checkin,
+        checkout,
+        guests,
+        requests
+      };
+
+      const data = await apiFetch('/api/bookings', { method: 'POST', body: JSON.stringify(payload) });
+      return data.booking;
+    }
+
+    function openReceipt(booking){
+      const tier = ROOM_TIERS[booking.roomTier]?.label || booking.roomTier;
+      const statusBadge = (s)=>{
+        const map = {
+          pending: {t:'Pending', cls:'bg-amber-400/15 border-amber-300/25 text-amber-200'},
+          approved:{t:'Approved', cls:'bg-emerald-400/15 border-emerald-300/25 text-emerald-200'},
+          declined:{t:'Declined', cls:'bg-rose-400/15 border-rose-300/25 text-rose-200'}
+        };
+        const m = map[s] || map.pending;
+        return `<span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs ${m.cls}"><span class="w-1.5 h-1.5 rounded-full" style="background: currentColor; opacity:.9"></span>${m.t}</span>`;
+      };
+
+      $('#receiptBody').innerHTML = `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Booking ID</div>
+            <div class="mt-1 text-lg font-semibold">${escapeHTML(booking.bookingCode)}</div>
+            <div class="mt-2 text-xs text-white/55">Created: ${escapeHTML(new Date(booking.createdAt).toLocaleString())}</div>
+            <div class="mt-3">${statusBadge(booking.status)}</div>
+          </div>
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Hotel</div>
+            <div class="mt-1 text-lg font-semibold">${escapeHTML(booking.hotel.name)}</div>
+            <div class="mt-1 text-xs text-white/55">${escapeHTML(booking.hotel.location)}</div>
+            <div class="mt-2 text-xs text-white/55">Room tier: <span class="text-white/75">${escapeHTML(tier)}</span></div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Guest</div>
+            <div class="mt-1 text-sm font-semibold">${escapeHTML(booking.guest.name)}</div>
+            <div class="mt-1 text-xs text-white/55">${escapeHTML(booking.guest.email)}</div>
+            <div class="mt-1 text-xs text-white/55">Phone: ${escapeHTML(booking.guest.phone || '—')}</div>
+          </div>
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Stay</div>
+            <div class="mt-1 text-sm font-semibold">${escapeHTML(booking.stay.checkin)} → ${escapeHTML(booking.stay.checkout)}</div>
+            <div class="mt-1 text-xs text-white/55">Nights: ${booking.stay.nights}</div>
+            <div class="mt-1 text-xs text-white/55">Guests: ${booking.stay.guests}</div>
+          </div>
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+            <div class="text-xs text-white/55">Pricing</div>
+            <div class="mt-1 text-sm font-semibold">PKR ${moneyPKR(booking.pricing.total)}</div>
+            <div class="mt-1 text-xs text-white/55">Rate: PKR ${moneyPKR(booking.pricing.ratePerNight)}/night</div>
+            <div class="mt-1 text-xs text-white/55">Payment: Pay at hotel</div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+          <div class="text-xs text-white/55">Special requests</div>
+          <div class="mt-2 text-sm text-white/65">${booking.requests ? escapeHTML(booking.requests) : '<span class="text-white/45">None</span>'}</div>
+        </div>
+
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+          <div class="text-sm font-semibold">Notes</div>
+          <ul class="mt-2 text-xs text-white/55 space-y-1">
+            <li>• Please bring a valid ID for verification at check-in.</li>
+            <li>• Booking approval is handled by admin (status will update).</li>
+          </ul>
+        </div>
+      `;
+
+      const modal = $('#receiptModal');
+      modal.classList.remove('hidden');
+      modal.querySelector('[data-close="receipt"]').focus?.();
+
+      // Copy details
+      $('#receiptCopy').onclick = async ()=>{
+        const text = `Nocturne Stays Receipt\nBooking ID: ${booking.bookingCode}\nHotel: ${booking.hotel.name}\nRoom: ${tier}\nGuest: ${booking.guest.name} (${booking.guest.email})\nDates: ${booking.stay.checkin} to ${booking.stay.checkout} (${booking.stay.nights} nights)\nGuests: ${booking.stay.guests}\nTotal: PKR ${booking.pricing.total}\nPayment: Pay at hotel\nStatus: ${booking.status}`;
+        try{
+          await navigator.clipboard.writeText(text);
+          toast('good','Copied','Receipt details copied to clipboard.');
+        }catch{
+          toast('warn','Copy blocked','Your browser blocked clipboard access.');
+        }
+      };
+    }
+
+    function closeReceipt(){ $('#receiptModal').classList.add('hidden'); }
+
+    // -----------------------------
+    // My Bookings
+    // -----------------------------
+    async function renderMyBookings(){
+      const sess = getSession();
+      if(!sess || sess.role!=='user') return;
+      const wrap = $('#myBookingsList');
+      if(!wrap) return;
+
+      try{
+        const data = await apiFetch('/api/bookings/mine');
+        const mine = Array.isArray(data?.bookings) ? data.bookings : [];
+
+        if(mine.length===0){
+          wrap.innerHTML = `
+            <div class="card rounded-3xl p-8">
+              <div class="text-xs text-white/55">No bookings yet</div>
+              <div class="mt-2 font-display text-2xl">Your history will appear here</div>
+              <p class="mt-2 text-white/60">Book a hotel to generate a receipt and track your booking status.</p>
+              <div class="mt-5">
+                <a href="#hotels" class="btn px-5 py-3 rounded-xl text-sm">Browse hotels</a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        wrap.innerHTML = mine.map(b=> myBookingCard(b)).join('');
+        mine.forEach(b=>{
+          const btn = document.getElementById(`openReceipt-${b.bookingCode}`);
+          btn?.addEventListener('click', ()=> openReceipt(b));
+        });
+      }catch(err){
+        wrap.innerHTML = `
+          <div class="card rounded-3xl p-8">
+            <div class="text-xs text-white/55">Could not load bookings</div>
+            <div class="mt-2 font-display text-2xl">Server connection issue</div>
+            <p class="mt-2 text-white/60">Please make sure the backend server is running.</p>
+          </div>
+        `;
+      }
+    }
+
+    function statusPill(status){
+      const map = {
+        pending:  {label:'Pending', cls:'bg-amber-400/15 border-amber-300/25 text-amber-200'},
+        approved: {label:'Approved', cls:'bg-emerald-400/15 border-emerald-300/25 text-emerald-200'},
+        declined: {label:'Declined', cls:'bg-rose-400/15 border-rose-300/25 text-rose-200'}
+      };
+      const m = map[status] || map.pending;
+      return `<span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs ${m.cls}"><span class="w-1.5 h-1.5 rounded-full" style="background: currentColor; opacity:.9"></span>${m.label}</span>`;
+    }
+
+    function myBookingCard(b){
+      const tier = ROOM_TIERS[b.roomTier]?.label || b.roomTier;
+      return `
+        <div class="card rounded-3xl p-6 sm:p-7">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <div class="text-xs text-white/55">Booking ID</div>
+              <div class="mt-1 text-lg font-semibold">${escapeHTML(b.bookingCode)}</div>
+              <div class="mt-2 text-sm text-white/75">${escapeHTML(b.hotel.name)} <span class="text-white/45">•</span> ${escapeHTML(tier)}</div>
+              <div class="mt-1 text-xs text-white/55">${escapeHTML(b.stay.checkin)} → ${escapeHTML(b.stay.checkout)} • ${b.stay.nights} nights • ${b.stay.guests} guests</div>
+            </div>
+            <div class="flex flex-col items-start sm:items-end gap-2">
+              ${statusPill(b.status)}
+              <div class="text-xs text-white/55">Total: <span class="text-white/75">PKR ${moneyPKR(b.pricing.total)}</span></div>
+              <button id="openReceipt-${escapeHTML(b.bookingCode)}" class="btn-ghost px-4 py-2 rounded-xl text-sm">Open receipt</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // -----------------------------
+    // Admin
+    // -----------------------------
+    let adminStatusFilter = 'all';
+
+    async function renderAdmin(){
+      const sess = getSession();
+      if(!sess || sess.role!=='admin') return;
+
+      const wrap = $('#adminTable');
+      try{
+        const data = await apiFetch('/api/admin/bookings');
+        const all = Array.isArray(data?.bookings) ? data.bookings : [];
+
+        $('#adminTotal').textContent = all.length;
+        $('#adminPending').textContent = all.filter(b=>b.status==='pending').length;
+        $('#adminApproved').textContent = all.filter(b=>b.status==='approved').length;
+        $('#adminDeclined').textContent = all.filter(b=>b.status==='declined').length;
+
+        const q = ($('#adminSearch').value || '').trim().toLowerCase();
+
+        let list = all;
+        if(adminStatusFilter !== 'all') list = list.filter(b=>b.status===adminStatusFilter);
+        if(q) list = list.filter(b=>{
+          return (b.bookingCode||'').toLowerCase().includes(q)
+            || (b.guest?.name||'').toLowerCase().includes(q)
+            || (b.guest?.email||'').toLowerCase().includes(q)
+            || (b.hotel?.name||'').toLowerCase().includes(q);
+        });
+
+        if(list.length===0){
+          wrap.innerHTML = `
+            <div class="rounded-3xl bg-white/5 border border-white/10 p-8">
+              <div class="text-xs text-white/55">No results</div>
+              <div class="mt-2 font-display text-2xl">Nothing to review</div>
+              <div class="mt-2 text-white/60">Try changing your status filter or search query.</div>
+            </div>
+          `;
+          return;
+        }
+
+        wrap.innerHTML = list.map(b=> adminRow(b)).join('');
+
+        list.forEach(b=>{
+          const ap = document.getElementById(`approve-${b.bookingCode}`);
+          const de = document.getElementById(`decline-${b.bookingCode}`);
+          const rc = document.getElementById(`receipt-${b.bookingCode}`);
+          ap?.addEventListener('click', ()=> updateBookingStatus(b.bookingCode, 'approved'));
+          de?.addEventListener('click', ()=> updateBookingStatus(b.bookingCode, 'declined'));
+          rc?.addEventListener('click', ()=> openReceipt(b));
+        });
+      }catch(err){
+        $('#adminTotal').textContent = '0';
+        $('#adminPending').textContent = '0';
+        $('#adminApproved').textContent = '0';
+        $('#adminDeclined').textContent = '0';
+        wrap.innerHTML = `
+          <div class="rounded-3xl bg-white/5 border border-white/10 p-8">
+            <div class="text-xs text-white/55">Could not load admin data</div>
+            <div class="mt-2 font-display text-2xl">Server connection issue</div>
+            <p class="mt-2 text-white/60">Please make sure the backend server is running and you are logged in as admin.</p>
+          </div>
+        `;
+      }
+    }
+
+    function adminRow(b){
+      const tier = ROOM_TIERS[b.roomTier]?.label || b.roomTier;
+      return `
+        <div class="rounded-3xl bg-white/5 border border-white/10 p-5">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="text-sm font-semibold">${escapeHTML(b.hotel.name)}</div>
+                ${statusPill(b.status)}
+                <span class="text-xs text-white/55">${escapeHTML(tier)}</span>
+              </div>
+              <div class="mt-2 text-xs text-white/55">Booking ID: <span class="text-white/75">${escapeHTML(b.bookingCode)}</span> • Created: ${escapeHTML(new Date(b.createdAt).toLocaleString())}</div>
+              <div class="mt-2 text-sm text-white/70">Guest: <span class="text-white/85">${escapeHTML(b.guest.name)}</span> <span class="text-white/45">•</span> ${escapeHTML(b.guest.email)}</div>
+              <div class="mt-1 text-xs text-white/55">${escapeHTML(b.stay.checkin)} → ${escapeHTML(b.stay.checkout)} • ${b.stay.nights} nights • ${b.stay.guests} guests • Total: PKR ${moneyPKR(b.pricing.total)}</div>
+              <div class="mt-2 text-xs text-white/55">Requests: ${b.requests ? escapeHTML(b.requests) : '<span class="text-white/45">None</span>'}</div>
+            </div>
+            <div class="flex md:flex-col gap-2 md:items-end">
+              <button id="receipt-${escapeHTML(b.bookingCode)}" class="btn-ghost px-4 py-2 rounded-xl text-sm">Receipt</button>
+              <button id="approve-${escapeHTML(b.bookingCode)}" class="btn px-4 py-2 rounded-xl text-sm" style="background: linear-gradient(135deg, rgba(16,185,129,.85), rgba(34,211,238,.55));">Approve</button>
+              <button id="decline-${escapeHTML(b.bookingCode)}" class="btn-ghost px-4 py-2 rounded-xl text-sm" style="border-color: rgba(251,113,133,.25);">Decline</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function updateBookingStatus(code, status){
+      try{
+        await apiFetch(`/api/admin/bookings/${encodeURIComponent(code)}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status })
+        });
+        toast('good','Updated',`Booking ${code} marked as ${status}.`);
+        await renderAdmin();
+        await renderMyBookings();
+      }catch(err){
+        toast('bad','Update failed', err.message || 'Try again');
+      }
+    }
+
+    // -----------------------------
+    // Auth (API)
+    // -----------------------------
+    async function registerUser(name, email, pass){
+      const payload = { name, email, password: pass };
+      await apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+      return true;
+    }
+
+    async function loginUser(email, pass, asAdmin){
+      const payload = { email, password: pass, asAdmin: !!asAdmin };
+      const data = await apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify(payload) });
+      const user = data.user;
+      const sess = {
+        token: data.token,
+        role: user.role,
+        email: user.email,
+        name: user.name,
+        loginAt: new Date().toISOString()
+      };
+      setSession(sess);
+      return sess;
+    }
+
+    async function refreshSessionFromAPI(){
+      const sess = getSession();
+      if(!sess?.token) return;
+      try{
+        const data = await apiFetch('/api/auth/me');
+        const u = data.user;
+        setSession({ ...sess, role: u.role, email: u.email, name: u.name });
+      }catch(err){
+        // token expired/invalid
+        clearSession();
+      }
+    }
+
+    function logout(){
+      clearSession();
+      updateSessionUI();
+      toast('good','Logged out','You are now signed out.');
+      // go home
+      location.hash = '#home';
+    }
+
+    // -----------------------------
+    // Scroll reveal
+    // -----------------------------
+    function setupReveal(){
+      const io = new IntersectionObserver((entries)=>{
+        for(const e of entries){
+          if(e.isIntersecting){
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.12 });
+      $$('.reveal').forEach(el=> io.observe(el));
+    }
+
+    // -----------------------------
+    // Event bindings
+    // -----------------------------
+    function bindUI(){
+      $('#mobileMenuBtn').addEventListener('click', ()=>{
+        $('#mobileMenu').classList.toggle('hidden');
+      });
+
+      $('#btnAuth').addEventListener('click', ()=> location.hash = '#login');
+      $('#btnLogout').addEventListener('click', logout);
+
+      $('#sortPrice').addEventListener('click', ()=>{
+        hotelsSortAsc = !hotelsSortAsc;
+        $('#sortPrice').textContent = `Sort: Price ${hotelsSortAsc ? '↑' : '↓'}`;
+        renderHotels();
+      });
+
+      $$('.roomTierBtn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          selectedTier = btn.dataset.tier;
+          renderHotels();
+          updateQuickEstimate();
+        });
+      });
+
+      $('#quickCheckin').addEventListener('change', updateQuickEstimate);
+      $('#quickCheckout').addEventListener('change', updateQuickEstimate);
+
+      $('#quickBookBtn').addEventListener('click', ()=>{
+        // enforce login for booking
+        const sess = getSession();
+        if(!sess || sess.role!=='user'){
+          setPendingRedirect('#booking');
+          toast('warn','Login required','Login to continue booking.');
+          location.hash = '#login';
+          return;
+        }
+        location.hash = '#booking';
+        setTimeout(()=>{
+          $('#bookHotel').value = selectedHotelId;
+          $('#bookTier').value = selectedTier;
+          $('#bookCheckin').value = $('#quickCheckin').value;
+          $('#bookCheckout').value = $('#quickCheckout').value;
+          updateBookingTotals();
+        }, 0);
+      });
+
+      $('#heroQuickDemo').addEventListener('click', ()=>{
+        // Create a sample receipt (not stored) for aesthetics
+        const demo = {
+          bookingCode: 'NS-DEMO-2467',
+          createdAt: new Date().toISOString(),
+          status: 'pending',
+          hotel: { id: HOTELS[2].id, name: HOTELS[2].name, location: HOTELS[2].location, city: HOTELS[2].city },
+          roomTier: 'deluxe',
+          guest: { name: 'Demo Guest', email: 'demo@guest.com', phone: '+92 300 0000000' },
+          stay: { checkin: new Date(Date.now()+86400000).toISOString().slice(0,10), checkout: new Date(Date.now()+86400000*3).toISOString().slice(0,10), nights: 2, guests: 2 },
+          pricing: { ratePerNight: ratePerNight(HOTELS[2], 'deluxe'), total: ratePerNight(HOTELS[2], 'deluxe')*2, currency: 'PKR' },
+          requests: 'Quiet room, high floor'
+        };
+        openReceipt(demo);
+      });
+
+      // Close receipt modal
+      $('#receiptModal').addEventListener('click', (e)=>{
+        const t = e.target;
+        if(t?.dataset?.close==='receipt') closeReceipt();
+      });
+      document.addEventListener('keydown', (e)=>{
+        if(e.key==='Escape') closeReceipt();
+      });
+      $('#receiptPrint').addEventListener('click', ()=> window.print());
+
+      // Auth forms
+      $('#registerForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const name = $('#regName').value;
+        const email = $('#regEmail').value;
+        const p1 = $('#regPassword').value;
+        const p2 = $('#regPassword2').value;
+        if(p1.length < 8){ toast('warn','Weak password','Use at least 8 characters.'); return; }
+        if(p1 !== p2){ toast('bad','Mismatch','Passwords do not match.'); return; }
+        try{
+          await registerUser(name, email, p1);
+          toast('good','Account created','Now login to book rooms.');
+          location.hash = '#login';
+          $('#loginEmail').value = email.trim().toLowerCase();
+        }catch(err){
+          toast('bad','Register failed', err.message || 'Try again');
+        }
+      });
+
+      $('#loginForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const email = $('#loginEmail').value;
+        const pass = $('#loginPassword').value;
+        const asAdmin = $('#loginAsAdmin').checked;
+        try{
+          await loginUser(email, pass, asAdmin);
+          updateSessionUI();
+          toast('good','Welcome', asAdmin ? 'Admin logged in.' : 'Login successful.');
+          const redirect = consumeRedirect();
+          location.hash = redirect || (asAdmin ? '#admin' : '#hotels');
+        }catch(err){
+          toast('bad','Login failed', err.message || 'Try again');
+        }
+      });
+
+      // Booking form
+      $('#bookingForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        try{
+          const booking = await createBookingFromForm();
+          toast('good','Booked','Your booking is created and pending approval.');
+          openReceipt(booking);
+        }catch(err){
+          toast('bad','Booking failed', err.message || 'Try again');
+        }
+      });
+
+      // Admin controls
+      $$('.adminFilter').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          adminStatusFilter = btn.dataset.status;
+          $$('.adminFilter').forEach(b=> b.classList.remove('ring-2','ring-cyan-300/20','bg-white/8'));
+          btn.classList.add('ring-2','ring-cyan-300/20','bg-white/8');
+          renderAdmin();
+        });
+      });
+      $('.adminFilter[data-status="all"]').classList.add('ring-2','ring-cyan-300/20','bg-white/8');
+
+      $('#adminSearch').addEventListener('input', ()=> renderAdmin());
+      $('#adminExport').addEventListener('click', async ()=>{
+        try{
+          const data = await apiFetch('/api/admin/export');
+          const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'nocturne-stays-export.json';
+          a.click();
+          URL.revokeObjectURL(url);
+          toast('good','Exported','Downloaded JSON export.');
+        }catch(err){
+          toast('bad','Export failed', err.message || 'Try again');
+        }
+      });
+      $('#adminClear').addEventListener('click', async ()=>{
+        if(!confirm('Clear all bookings and user accounts?')) return;
+        try{
+          await apiFetch('/api/admin/clear', { method: 'DELETE' });
+          toast('good','Cleared','Data removed.');
+          await renderAdmin();
+        }catch(err){
+          toast('bad','Clear failed', err.message || 'Try again');
+        }
+      });
+
+      // Keep quick estimate updated
+      ['quickCheckin','quickCheckout'].forEach(id=>{
+        $('#'+id).addEventListener('input', updateQuickEstimate);
+      });
+    }
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    async function init(){
+      bindUI();
+      setupReveal();
+      ensureDates();
+      
+      // Refresh user session state first
+      await refreshSessionFromAPI();
+      
+      // Fetch dynamic hotel data from the updated PostgreSQL database
+      await hydrateHotelsFromAPI();
+      
+      updateSessionUI();
+      renderHotels();
+
+      // initial route
+      guardRoute(getHashView());
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

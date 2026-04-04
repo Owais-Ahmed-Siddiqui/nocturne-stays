@@ -1,0 +1,8 @@
+{
+  "buildCommand": "echo 'Static files ready'",
+  "outputDirectory": "dist",
+  "routes": [
+    { "src": "/api/(.*)", "dest": "https://nocturne-stays.onrender.com/api/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}

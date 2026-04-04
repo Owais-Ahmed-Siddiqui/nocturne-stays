@@ -1,36 +1,100 @@
-# Nocturne Stays — Backend (Node.js + MySQL)
+# 🌙 Nocturne Stays
 
-## 1) Create database tables
-Open MySQL and run:
+A modern **full-stack hotel booking platform** featuring secure authentication, role-based access control, and streamlined booking workflows.
 
-- `backend/schema.sql`
+---
 
-This will create the `nocturne_stays` database + tables.
+## ⚡ Live Demo
 
-## 2) Configure environment
-Copy:
+https://nocturne-stays.vercel.app/
 
-- `backend/.env.example` → `backend/.env`
+---
 
-Update DB credentials.
+## 🛠 Tech Stack
 
-## 3) Install + seed + run
-From the `backend` folder:
+| Layer        | Technology                                  |
+| ------------ | ------------------------------------------- |
+| **Frontend** | Vanilla JavaScript, Tailwind CSS, Fetch API |
+| **Backend**  | Node.js, Express.js                         |
+| **Database** | Supabase (PostgreSQL)                       |
+| **Hosting**  | Vercel (Frontend), Render (Backend)         |
+
+---
+
+## ✨ Key Features
+
+* 🔐 **JWT Authentication** (User & Admin Roles)
+* 🏨 **Dynamic Hotel Listings** with real-time pricing calculation
+* 📊 **Admin Dashboard** to approve or decline bookings
+* 🖥️ **Responsive Dark UI** with modern glassmorphism design
+* 💳 **Pay-at-Hotel Workflow** (No payment gateway required)
+
+---
+
+## 🔑 Default Credentials
+
+> ⚠️ *For testing/demo purposes only. Change in production.*
+
+* **Email:** [admin@nocturne.stays]
+* **Password:** Admin@2467
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
 
 ```bash
+git clone https://github.com/Owais-Ahmed-Siddiqui/nocturne-stays.git
+cd nocturne-stays
+```
+
+### 2. Setup Environment Variables
+
+Create a `.env` file in your backend folder:
+
+```
+DATABASE_URL=your_supabase_connection_string
+JWT_SECRET=your_secret_key
+```
+
+### 3. Run Backend
+
+```bash
+cd backend
 npm install
-npm run seed
 npm start
 ```
 
-Then open:
-- http://localhost:3000
+### 4. Run Frontend
 
-The frontend (index.html) is served by the same Express server and will call `/api/*`.
+Open `index.html` or deploy via Vercel.
 
-## Admin login
-Default (seeded):
-- Email: `admin@nocturne.stays`
-- Password: `Admin@2467`
+---
 
-User accounts are created via Register.
+## 🌐 Deployment
+
+* **Frontend:** Deploy on Vercel
+* **Backend:** Deploy on Render
+* **Database:** Managed via Supabase
+
+---
+
+## 📌 Notes
+
+* `.env` and `node_modules` are intentionally excluded from GitHub for security and performance.
+* Ensure environment variables are properly set in **Render** and **Vercel dashboards**.
+
+---
+
+## 📄 License
+
+This project is for educational purposes. Modify and use as needed.
+
+---
+
+## 👨‍💻 Author
+
+**Owais Ahmed Siddiqui**
+
+---
